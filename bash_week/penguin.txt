@@ -1,0 +1,4 @@
+emperor,121
+royal,135
+adelie,500
+gentoo,145
