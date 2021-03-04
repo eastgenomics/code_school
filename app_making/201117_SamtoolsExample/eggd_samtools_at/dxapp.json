@@ -1,0 +1,57 @@
+{
+  "name": "eggd_samtools_at",
+  "title": "Samtools Dnanexus applet",
+  "summary": "Samtools app",
+  "dxapi": "1.0.0",
+  "inputSpec": [
+    {
+      "name": "bam_file",
+      "label": "bam file",
+      "help": "Bam file to be indexed",
+      "class": "file",
+      "patterns": ["*.bam"],
+      "optional": false
+    },
+    {
+      "name": "options",
+      "label": "Samtools options for user",
+      "help": "",
+      "class": "string",
+      "optional": true
+    }
+  ],
+  "outputSpec": [
+    {
+      "name": "index_file",
+      "label": "index file",
+      "help": "",
+      "class": "file",
+      "patterns": ["*"]
+    }
+  ],
+  "runSpec": {
+    "interpreter": "bash",
+    "timeoutPolicy": {
+      "*": {
+        "hours": 2
+      }
+    },
+    "distribution": "Ubuntu",
+    "release": "16.04",
+    "version": "1",
+    "file": "src/code.sh"
+  },
+  "access": {
+    "project": "CONTRIBUTE"
+  },
+  "ignoreReuse": false,
+  "regionalOptions": {
+    "aws:eu-central-1": {
+      "systemRequirements": {
+        "*": {
+          "instanceType": "mem1_ssd1_v2_x2"
+        }
+      }
+    }
+  }
+}
