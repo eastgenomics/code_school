@@ -10,7 +10,7 @@
     - controller : URL dispatcher, converts commands / user input and passes this to models or views
 
 - Other alternatives:
-    - Flash (Python)
+    - Flask (Python)
     - Ruby on Rails
     - Laravel
     - Spring
@@ -62,7 +62,7 @@
         migrations/
 ```
 
-- `admin.py`: used to define admin models for chaning admin interface
+- `admin.py`: used to define admin models for changing admin interface
 - `apps.py`: can help with definig app config / attributes
 - `models.py`: defines database tables and relations
 - `tests.py`: empty file to define unit tests
@@ -71,6 +71,32 @@
 
 ## Core Django concepts
 
+### Models
+
+- each class in `models.py` defines a table in database
+- after each change in models you have to migrate changes to the db
+    - `python manage.py makemigrations`
+    - `python manage.py migrate`
+- lots of different types - TextField, CharField, DateField, BooleanField etc.
+- can add validation to database fields to sanitise data
+- link tables together with `models.ForeignKey`
+- example `models.py`:
+
+https://github.com/eastgenomics/panel_palace/blob/main/panel_database/models.py
+
+```
+class Panel(models.Model):
+    panelapp_id = models.CharField(max_length=100)
+    name = models.CharField(max_length=100)
+    panel_type = models.ForeignKey("PanelType", on_delete=models.DO_NOTHING)
+
+    class Meta:
+        db_table = "panel"
+        indexes = [
+            models.Index(fields=["name"]),
+            models.Index(fields=["panelapp_id"])
+        ]
+```
 
 ### Views
 
@@ -148,6 +174,9 @@ urlpatterns = [
 </html>
 ```
 
+- make things pretty with the wonders of bootstrap and css
+
+
 ### Forms
 
 - used to define fields on a template that a user passes data with
@@ -184,6 +213,24 @@ class BandContactForm(forms.Form):
         - js/
         - css/
 ```
+
+### settings.py
+
+- `settings.py` file used to store all site settings
+- used to register new apps, define database connections, logging etc.
+- good practice to store auth keys and passwords etc in a separate config file and import, do not push passwords into GitHub
+- example: https://github.com/eastgenomics/Genetics_Ark/blob/ark_v2/ga_core/settings.py
+
+
+### Other random things
+
+- css / js:
+    - can provide css and js (JavaScript) to template either via a CDN link (content delivery network) or store files in `/static/`
+    - CDN: `<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    - local: <script type="text/javascript" src="/static/js/jquery.min.js"></script>
+- good practice to have a `base.html` template file that all others extend from
+    - load base template with `{% extends 'base.html' %}`
+    - https://github.com/eastgenomics/Genetics_Ark/tree/ark_v2/genetics_ark/templates
 
 
 ## Resources
