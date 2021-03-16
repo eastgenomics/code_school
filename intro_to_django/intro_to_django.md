@@ -39,6 +39,7 @@
 - `urls.py`: defines URLs - view mapping (i.e. what page URLs run what code)
 - `wsgi.py`: Web Server Gateway Interface, Django boilerplate code for running as web server
 
+<br></br>
 
 - Django development is centred around creating 'apps' that define each part of the site.
 - create a new app with from Django project dir `python3 manage.py startapp my_site_app`
