@@ -238,7 +238,6 @@ class BandContactForm(forms.Form):
 
 - example Django site:
     - Genetics Ark: https://github.com/eastgenomics/Genetics_Ark/tree/ark_v2
-    - 
 
 - docs:
     - https://www.djangoproject.com/start/
