@@ -27,14 +27,14 @@
 - my_site/
     - manage.py
     - my_site/
-        - __innit__.py
+        - __init__.py
         - settings.py
         - urls.py
         - wsgi.py
 ```
 
 - `manage.py` : Django python script for managing project (i.e. running the webserver)
-- `__innit__.py`: defines dir as Python package
+- `__init__.py`: defines dir as Python package
 - `settings.py`: contains all website settings
 - `urls.py`: defines URLs - view mapping (i.e. what page URLs run what code)
 - `wsgi.py`: Web Server Gateway Interface, Django boilerplate code for running as web server
@@ -49,7 +49,7 @@
 - my_site/
     - manage.py
     - my_site/
-        - __innit__.py
+        - __init__.py
         - settings.py
         - urls.py
         - wsgi.py
@@ -59,7 +59,7 @@
         - models.py
         - tests.py
         - views.py
-        - __innit__.py
+        - __init__.py
         migrations/
 ```
 
@@ -148,7 +148,7 @@ urlpatterns = [
         - models.py
         - tests.py
         - views.py
-        - __innit__.py
+        - __init__.py
         - templates/
             - my_site_app/
                 - my_template.html
@@ -205,7 +205,7 @@ class BandContactForm(forms.Form):
 - my_site/
     - manage.py
     - my_site/
-        - __innit__.py
+        - __init__.py
         - settings.py
         - urls.py
         - wsgi.py
