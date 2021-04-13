@@ -6,6 +6,7 @@ This series of notebooks and scripts is for an introduction to basics of coding.
 - Week 2: Bash
 - Week 3: DNAnexus App Building
 - Week 4: Intro to Django
+- Week 5: Argparse, list comprehensions and lambda functions
 
 
 ### Written by East Genomics GLH
