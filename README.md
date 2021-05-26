@@ -8,6 +8,7 @@ This series of notebooks and scripts is for an introduction to basics of coding.
 - Week 4: Intro to Django
 - Week 5: Argparse, list comprehensions and lambda functions
 - Week 6: Classes
+- Week 7: Virtual environments
 
 
 ### Written by East Genomics GLH
