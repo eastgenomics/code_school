@@ -1,0 +1,179 @@
+---
+title: "CNV_plots"
+output: 
+  html_document:
+    code_folding: hide
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+setwd("~/Documents/Training/codeschool/CNV_plots/bin")
+library(tidyverse)
+library(ggplot2)
+library(plotly)
+library(reshape2)
+```
+
+
+```{r, message=FALSE, warning=FALSE}
+# read data in by looping though each file in the directory
+mydir = "~/Documents/Training/codeschool/CNV_plots/data/padding5+0"
+total_files =  list.files(path = mydir, pattern= ("*.table"))
+for(file in total_files) {
+  filename <- strsplit(file, ".table") #removes the .table from filename
+  file_df <- read_table(paste(mydir, file, sep="/")) #read in the file as a dataframe
+  file_df <- file_df %>% unite('Region', CHROM:POS:END, remove = FALSE) # combine by region to later merge everythin by region
+  filename <- filename[[1]] #get the dataframe from the list
+  assign(filename, file_df) #assigns the filename to the object file_df which is the dataframe
+  # mega_dat <- c(mega_dat, file_df)
+  filename <- NULL
+  file_df <- NULL}
+
+rm(file, file_df, filename, mydir, total_files)
+```
+
+
+```{r}
+# append all the tables read in into a mega table
+dataframe <- ls()
+all_df <- get(dataframe[1])
+dataframe <- dataframe[-1]
+for(tbl in dataframe){
+  df <- get(tbl)
+  all_df <- full_join(all_df, df, by = "Region")
+}
+```
+
+
+```{r}
+# remove the chrom,pos,end and transpose data
+all_df2 <- all_df %>%
+  select(-starts_with(c("CHROM", "POS", "END"))) %>%
+  t %>%
+  as.data.frame()
+
+# make regions into rownames and remove from first row
+colnames(all_df2) <- all_df2[1,]
+all_df2 <- all_df2[-1,]
+
+# Split the rownames from the sample info CN, NP etc
+all_df3 <- all_df2 %>%
+  rownames_to_column(.data = ., var = "ID") %>% 
+  separate(data = ., col = "ID", 
+                        into = c("Sample", "Sample_Info"),
+                        sep = "\\.",
+                        extra = "merge")
+head(all_df3[1:5,1:5])
+```
+```{r}
+
+# use %in% instead of == or else will not keep duplicates !!
+all_df4 = all_df3 %>%
+  group_by(Sample_Info) %>%
+  filter(Sample_Info %in% c("CN")) %>%
+  pivot_longer(!c("Sample", "Sample_Info")) %>%
+  # select(-name) %>%
+  mutate(across(value, as.integer)) 
+
+
+all_df4[1:5,1:4]
+```
+```{r}
+# functions
+addSmallLegend <- function(myPlot, pointSize = 0.5, textSize = 6, spaceLegend = 0.1) {
+    myPlot +
+        guides(shape = guide_legend(override.aes = list(size = pointSize)),
+               color = guide_legend(override.aes = list(size = pointSize))) +
+        theme(legend.title = element_text(size = textSize), 
+              legend.text  = element_text(size = textSize),
+              legend.key.size = unit(spaceLegend, "lines"))
+}
+```
+
+```{r}
+
+# All regions
+q = all_df4 %>%
+  ggplot(aes(x)) +
+  geom_bar(aes(x=Sample, y=value, fill=name), stat="identity") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=1)) +
+  labs(title = "Distribution of CN across samples with 0 padding", x = "", y = "CN")
+# make legends smoll
+q = addSmallLegend(q)
+
+ggplotly(q)
+
+# Specific regions
+p = all_df4 %>%
+  filter(value != 2) %>%
+  ggplot(aes(x)) +
+  geom_bar(aes(x=Sample, y=value, fill=name), stat="identity") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=1)) +
+  labs(title = "Distribution of CN across samples with 0 padding (CN greater/less than 2)", x = "", y = "CN")
+# make legends smoll
+p = addSmallLegend(p)
+
+ggplotly(p)
+
+
+
+pdf("CN.pdf", paper = "USr")
+print(p)
+print(q)
+dev.off()
+
+
+```
+
+
+
+
+
+
+```{r}
+tmp <- all_df3 %>%
+  group_by(Sample_Info) %>%
+  filter(Sample_Info %in% c("QA", "QS")) %>%
+  pivot_longer(!c("Sample", "Sample_Info")) %>%
+  mutate(across(value, as.integer))
+
+
+p = tmp %>%
+  group_by(Sample_Info) %>%
+  pivot_wider(names_from = Sample_Info, values_from = c(value)) %>%
+  ggplot(aes(x)) +
+  geom_point(aes(x=QA,y=QS,color=Sample)) +
+  labs(x = "QA", y="QS", title = "QS vs QA - common regions")
+
+p = addSmallLegend(p)
+
+ggplotly(p)
+```
+
+
+
+```{r}
+tmp <- all_df3[,1:25] %>%
+  group_by(Sample_Info) %>%
+  filter(Sample_Info %in% c("QA", "QS")) %>%
+  pivot_longer(!c("Sample", "Sample_Info")) %>%
+  mutate(across(value, as.integer))
+
+
+p = tmp %>%
+  group_by(Sample_Info) %>%
+  pivot_wider(names_from = Sample_Info, values_from = c(value)) %>%
+  ggplot(aes(x)) +
+  geom_point(aes(x=QA,y=QS,color=Sample)) +
+  labs(x = "QA", y="QS", title = "QS vs QA - all regions")
+
+p = addSmallLegend(p)
+
+ggplotly(p)
+```
+
