@@ -1,0 +1,258 @@
+---
+title: "tidyverse"
+author: "Sophie Paul"
+date: "30/12/2021"
+output: 
+  html_document:
+    theme: paper
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+Tidyverse is a dialect of R that consists of a range of R packages developed
+by Hadley Wickham's team (and others). The main ones:
+
+- dplyr for data tidying
+- stringr for string manipulation
+- ggplot2 for plotting
+- purrr for iteration
+- magrittr for piping
+
+Quick note about piping
+
+Piping comes with tidyverse in `magrittr` library. Function calls can be constructed like
+
+```{r}
+numbers <- seq(1, 5)
+mean(sqrt(numbers))
+```
+
+With the `%>%` character, you can express these as a flow of data through functions instead:
+
+```{r}
+numbers %>% sqrt() %>% mean()
+```
+
+Onto tidyverse
+
+Here I've given you some data. What we want to do is see how the performance
+per flowcell is doing.
+
+### Reading data
+
+```{r}
+fastqc_data <- read_csv("data/fastqc_data.csv")
+```
+
+We can quickly inspect this to take a look at the layout
+
+```{r}
+summary(fastqc_data)
+glimpse(fastqc_data)
+head(fastqc_data)
+```
+
+We also have some metadata, which we'll read in:
+
+```{r}
+metadata <- read_csv("data/metadata.csv")
+```
+
+```{r}
+summary(metadata)
+glimpse(metadata)
+head(metadata)
+```
+
+file name is the common element between them.
+
+Since we need the project name, we can do some work:
+
+```{r}
+dataset <- left_join(fastqc_data, metadata, by = c("filename" = "file_name")) %>% unique()
+
+dataset
+```
+
+There's some cleaning to do. 
+
+1: extract extra features
+2: address the basecalling thing
+3: resolve duplicates
+
+First, let's see what features we can extract from the filename. Looks like:
+
+- sample name
+- sample number on flowcell
+- lane
+- read
+
+From the project, we can also get:
+
+- project type (dev, prod)
+- flowcell
+- assay
+
+We'll start with the filename features. `separate` is our friend here - it 
+creates new variables.
+
+NA12878--TWE-0-EGG4_S32_L001_R1_001
+
+```{r}
+data_2 <- dataset %>%
+   separate(filename, sep = "_", into = c("sample_name", "sample_number", "lane", "read", "something_else"))
+```
+
+```{r}
+data_2
+```
+
+We'll do something similar with the project. `separate` will be a bit more difficult here
+because the flowcell barcode is split with the same delimiter as the rest. This time,
+we'll create new columns with `extract`, and regexes
+
+002_210913_A01295_0024_AHL72CDRXY_TWE
+
+```{r}
+data_3 <- data_2 %>%
+  extract(col = project_name, into = c("project_type", "run_name", "assay"), regex = "(\\d{3})_(.*)_(\\w+)$")
+
+data_3
+```
+
+Another problem is that the `Base` field starts at 1 for read 2. If we want to visualise the
+cycles as a continuous sequence from 1-302, we'll want to add an offset to read 2 only. Here,
+mutate is our friend. We'll make a new column called `cycle` for this purpose.
+
+```{r}
+data_4 <- data_3 %>%
+  mutate(cycle = ifelse(read == "R1", Base, Base + 151))
+
+data_4
+```
+
+It's starting to get a bit difficult to look at, so let's rearrange the columns using `select`.
+
+```{r}
+data_5 <- data_4 %>%
+  select(starts_with("sample"), starts_with("project"), assay, run_name, lane, read, Base, cycle, everything())
+
+data_5
+```
+
+We can also use `select` to retain or drop columns.
+Some other things that you might want to do is create factors from categorical variables
+to help with ordering. But we won't do this for now.
+
+Something you may have noticed is that we appear to have gained rows since joining the datasets together, which is weird.
+
+```{r}
+nrow(data_5) - nrow(fastqc_data)
+```
+
+How are we going to find these?
+
+Let's use grouped filtering to find the odd ones out.
+
+Here's a quick `filter` to show you how it works:
+
+```{r}
+data_5 %>%
+  filter(sample_name == "NA12878--TWE-0-EGG4")
+```
+
+We can use `group_by`, which groups your data by any variables you have.
+
+```{r}
+data_5 %>%
+  group_by(sample_name, sample_number, lane, read, Base, something_else, Mean, Median, Lower.Quartile) %>%
+  mutate(count = n()) %>%
+  filter(count >= 2) %>%
+  select(sample_name, Base, Mean, file_id, everything())
+```
+
+The data is unique except for the file ID, probably due to multiple invocations of FASTQC on the same data. We can try removing the file ID, unique-ifying the result, and comparing with the original again.
+
+```{r}
+data_6 <- data_5 %>%
+  select(-file_id) %>%
+  unique()
+
+nrow(data_6) - nrow(fastqc_data)
+```
+
+It worked :)
+
+## analysis
+
+We can start doing some analysis. Couple of ideas:
+
+- plot the mean quality by cycle, and stratify by run
+- summarise distributions per cycle and per run
+
+We'll use ggplot for the first.
+
+ggplot stands for the grammar of graphics: i.e., you build up visualisations
+by specifying things in order:
+
+- data
+- aesthetics (i.e. what your x, y, z, colour, shape, size, etc. variables will be)
+- geometric object (points, lines, etc.)
+- facets (i.e. multiple plots)
+- statistical transformations (counts, logs, mean+se, including leaving things as they are; i.e. identity)
+- coordinates (zoom)
+- theme
+
+```{r}
+theme_set(theme_bw())
+
+ggplot(data = data_6, aes(x = cycle, y = Mean, group = paste0(sample_name, run_name, lane))) +
+  geom_line(aes(colour = run_name), alpha = 0.7)
+```
+
+It's ok. But we can do better.
+
+```{r}
+cycleplot <- ggplot(data = data_6, aes(x = cycle, y = Mean, group = paste0(run_name, lane))) +
+  stat_summary(geom = "errorbar", fun = mean, fun.min = min, fun.max = max, aes(colour = run_name), alpha = 0.15) +
+  stat_summary(geom = "line", fun = mean, aes(colour = run_name))
+
+cycleplot
+```
+
+```{r}
+cycleplot +
+  facet_wrap(~ lane)
+```
+
+```{r}
+ggplot(data = data_5, aes(x = cycle, y = Mean, group = sample_name)) +
+  stat_identity(geom = "line", aes(colour = run_name), alpha = 0.7)
+```
+
+```{r}
+ggplot(data = data_5, aes(x = cycle, y = Mean, group = run_name)) +
+  stat_summary(geom = "errorbar", fun = mean, fun.min = min, fun.max = max, aes(colour = run_name), alpha = 0.3) +
+  stat_summary(geom = "line", fun = mean, aes(colour = run_name)) +
+  facet_wrap(~ lane)
+```
+
+Summarising last 10 cycles
+
+```{r}
+data_5 %>%
+  filter(cycle >= 292) %>%
+  group_by(sample_name, run_name, lane) %>%
+  summarise(m = mean(Mean)) %>%
+  ungroup() %>%
+  ggplot(aes(x = m)) +
+    geom_density(aes(colour = run_name, fill = run_name, group = str_c(run_name, lane)), alpha = 0.5) +
+    facet_grid(lane ~ .)
+```
