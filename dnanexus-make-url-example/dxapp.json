@@ -1,0 +1,54 @@
+{
+  "name": "generate_external_download_urls",
+  "title": "Generate External Download URLs",
+  "summary": "Generates External Download URLs",
+  "dxapi": "1.0.0",
+  "version": "0.0.1",
+  "inputSpec": [
+    {
+      "name": "input_files",
+      "label": "Input Files",
+      "class": "array:file",
+      "optional": false
+    },
+    {
+      "name": "token_file",
+      "label": "Token File",
+      "class": "file",
+      "optional": false
+    }
+  ],
+  "outputSpec": [
+    {
+      "name": "download_urls",
+      "label": "Download URLs",
+      "class": "array:string"
+    }
+  ],
+  "runSpec": {
+    "timeoutPolicy": {
+      "*": {
+        "hours": 48
+      }
+    },
+    "interpreter": "python3",
+    "file": "src/generate_external_download_urls.py",
+    "distribution": "Ubuntu",
+    "release": "20.04",
+    "version": "0"
+  },
+    "access": {
+    "network": [
+      "*"
+    ]
+  },
+  "regionalOptions": {
+    "aws:us-east-1": {
+      "systemRequirements": {
+        "*": {
+          "instanceType": "mem1_ssd1_v2_x4"
+        }
+      }
+    }
+  }
+}
