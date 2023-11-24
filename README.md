@@ -17,6 +17,9 @@ This series of notebooks and scripts is for an introduction to basics of coding.
 ### 2023 additions
 
 - Biopython: A basic introduction
-
+- Coding tasks:
+  - VEP comparison
+  - hap.py output plotting
+  - TSO500 CNV counting
 
 ### Written by East Genomics GLH
