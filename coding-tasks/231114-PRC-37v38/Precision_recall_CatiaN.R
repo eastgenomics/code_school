@@ -1,8 +1,4 @@
-install.packages("devtools")
-install.packages('dplyr')
-install.packages('readr')
-install.packages('tidyverse')
-install.packages("plyr")
+
 library(devtools)
 library(tidyverse)
 library(dplyr)
