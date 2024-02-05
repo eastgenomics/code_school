@@ -1,4 +1,4 @@
-## Task for 28/11/23:
+## Task for 05/02/24:
 
 Aggregate all CNV excluded regions and create a table with all regions that have been ever excluded with a count of how many times for each interval and annotated with hgnc ids and gene symbols.
 
