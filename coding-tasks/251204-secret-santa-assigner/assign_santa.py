@@ -174,7 +174,7 @@ def convert_excluded_dataframe_to_dict(input_df: pd.DataFrame, names: list):
 
 def assign_secret_santa(
     names: list, exclusions_dict: dict[str, list[str]], max_attempts: int
-) -> dict[str, str] | None:
+) -> dict[str, str]:
     """
     Assign Secret Santa pairs.
 
@@ -247,18 +247,14 @@ def print_and_write_out_results(santa_assignment: dict, outfile_name: str):
        *  * * *  *
     """
     print(santa_ascii)
-    print("Shhh! Here are the secret Santa assignments:")
-    print("-" * 40)
-
-    for giver, receiver in santa_assignment.items():
-        print(f"{giver} buys a present for {receiver}")
-    print("-" * 40)
 
     with open(outfile_name, mode="w", encoding="utf8") as out_file:
         writer = csv.writer(out_file)
         writer.writerow(["giver", "receiver"])
         writer.writerows(santa_assignment.items())
-        print(f"Results written to {outfile_name}")
+        print(
+            f"Shhh! Secret Santa assignment results written to {outfile_name}"
+        )
 
 
 def main():

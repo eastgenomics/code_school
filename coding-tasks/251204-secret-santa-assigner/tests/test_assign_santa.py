@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from .. import assign_santa as assign
+import assign_santa as assign
 
 
 def test_convert_excluded_dataframe_to_dict():
@@ -26,9 +26,9 @@ def test_error_raised_if_less_than_2_names():
     """
     Test error raised if <2 names given as input
     """
-    names = ["Alice"]
+    names_df = pd.DataFrame({"name": ["Alice"]})
     with pytest.raises(ValueError):
-        assign.validate_participants(names)
+        assign.validate_participants(names_df)
 
 
 def test_assign_secret_santa_simple():
