@@ -22,4 +22,9 @@ This series of notebooks and scripts is for an introduction to basics of coding.
   - hap.py output plotting
   - TSO500 CNV counting
 
+### 2026 additions
+
+- Unit Testing: Principles, Python and TDD
+
+
 ### Written by East Genomics GLH
