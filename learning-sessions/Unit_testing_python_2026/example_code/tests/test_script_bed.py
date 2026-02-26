@@ -1,11 +1,11 @@
-"""Unit tests for the calculate_gc_content function in bin/script_bed.py."""
+"""Unit tests for calculate_total_bed_length function in bin/script_bed.py."""
 import pytest
 from bin.script_bed import calculate_total_bed_length
 
 
 @pytest.fixture(name="valid_bed")
 def valid_bed_factory(tmp_path):
-    """Creates a valid 3-line BED file."""
+    """Creates a valid 2-line BED file."""
     f = tmp_path / "valid.bed"
     f.write_text("chr1\t100\t200\nchr2\t0\t50")
     return f

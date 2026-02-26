@@ -1,4 +1,4 @@
-"""Unit tests for the calculate_gc_content function in bin/clinvar_utils.py."""
+"""Unit tests for get_clinvar_significance function in bin/clinvar_utils.py."""
 import pytest
 from bin.clinvar_utils import get_clinvar_significance
 
@@ -21,7 +21,9 @@ def mock_clinvar_factory(mocker):
 class TestClinVarUtils:
     """Tests for the get_clinvar_significance function."""
 
-    def test_significance_logic(self, _clinvar_mock):
+    def test_significance_logic(
+        self, clinvar_mock  # pylint: disable=unused-argument
+    ):
         """
         Test that the function correctly extracts clinical
         significance from mocked API response.

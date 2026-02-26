@@ -38,7 +38,8 @@ def get_clinvar_significance(variation_id):
     # Parse the nested JSON structure to get the significance
     try:
         significance = data['clinical_significance']['description']
-        return significance
     except KeyError as exc:
         raise ValueError(
             f"Could not find significance data for ID {variation_id}") from exc
+    else:
+        return significance
