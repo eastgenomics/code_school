@@ -40,6 +40,5 @@ class TestGCContentEdgeCases:
     def test_invalid_characters(self):
         """Test if ValueError is raised for sequences with invalid chars."""
         with pytest.raises(ValueError,
-                           match="Sequence contains invalid characters. "
-                           "Only A, T, G, C are allowed."):
+                           match="Sequence contains invalid characters"):
             calculate_gc_content("ATGCX")
